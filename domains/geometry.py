@@ -9,6 +9,8 @@ Para agregar un nuevo teorema:
   3. Listo — register(kb) lo incluirá automáticamente.
 """
 
+import math
+
 from core.theorem import Theorem, Hypothesis, Conclusion
 from core.knowledge import KnowledgeBase
 
@@ -35,6 +37,10 @@ PITAGORAS = Theorem(
         Hypothesis("a > 0", lambda ctx: ctx["a"] > 0),
         Hypothesis("b > 0", lambda ctx: ctx["b"] > 0),
         Hypothesis("c > 0", lambda ctx: ctx["c"] > 0),
+        # Pitagoras es un caso especial donde C = pi/2.
+        # Si el angulo C es conocido y no es pi/2, este teorema no aplica
+        # y debe usarse la Ley de Cosenos en su lugar.
+        Hypothesis("C = pi/2 (si se conoce)", lambda ctx: ctx.get("C", math.pi / 2) == math.pi / 2),
     ],
     conclusions=[
         Conclusion(
@@ -56,10 +62,52 @@ PITAGORAS = Theorem(
 )
 
 
+# ── Ley de Cosenos ────────────────────────────────────────────────────────────
+#
+# En cualquier triangulo: c² = a² + b² - 2·a·b·cos(C)
+# donde A, B, C son los angulos opuestos a los lados a, b, c (en radianes).
+#
+# Permite calcular un lado conociendo los otros dos y el angulo entre ellos,
+# o calcular un angulo conociendo los tres lados.
+
+LEY_DE_COSENOS = Theorem(
+    name="Ley de Cosenos",
+    domain="geometria",
+    description="c^2 = a^2 + b^2 - 2*a*b*cos(C) para cualquier triangulo",
+    variables={
+        "a": "lado a",
+        "b": "lado b",
+        "c": "lado c",
+        "A": "angulo opuesto a 'a' (radianes)",
+        "B": "angulo opuesto a 'b' (radianes)",
+        "C": "angulo opuesto a 'c' (radianes)",
+    },
+    hypotheses=[
+        Hypothesis("a > 0",      lambda ctx: ctx["a"] > 0),
+        Hypothesis("b > 0",      lambda ctx: ctx["b"] > 0),
+        Hypothesis("c > 0",      lambda ctx: ctx["c"] > 0),
+        Hypothesis("0 < A < pi", lambda ctx: 0 < ctx["A"] < math.pi),
+        Hypothesis("0 < B < pi", lambda ctx: 0 < ctx["B"] < math.pi),
+        Hypothesis("0 < C < pi", lambda ctx: 0 < ctx["C"] < math.pi),
+    ],
+    conclusions=[
+        # Calcular un lado dados los otros dos y el angulo entre ellos
+        Conclusion("c", "sqrt(a**2 + b**2 - 2*a*b*cos(C))", "lado c dado a, b y el angulo C"),
+        Conclusion("a", "sqrt(b**2 + c**2 - 2*b*c*cos(A))", "lado a dado b, c y el angulo A"),
+        Conclusion("b", "sqrt(a**2 + c**2 - 2*a*c*cos(B))", "lado b dado a, c y el angulo B"),
+        # Calcular un angulo dados los tres lados
+        Conclusion("C", "acos((a**2 + b**2 - c**2) / (2*a*b))", "angulo C dado los tres lados"),
+        Conclusion("A", "acos((b**2 + c**2 - a**2) / (2*b*c))", "angulo A dado los tres lados"),
+        Conclusion("B", "acos((a**2 + c**2 - b**2) / (2*a*c))", "angulo B dado los tres lados"),
+    ],
+)
+
+
 # ── Registro ──────────────────────────────────────────────────────────────────
 
 _THEOREMS = [
     PITAGORAS,
+    LEY_DE_COSENOS,
 ]
 
 

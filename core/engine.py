@@ -3,7 +3,7 @@ from core.expression import Expression, ExpressionError
 from core.knowledge import KnowledgeBase
 from core.theorem import Theorem
 
-MAX_DEPTH = 20  # límite de recursión para evitar ciclos infinitos
+MAX_DEPTH = 10  # límite de profundidad de búsqueda
 
 
 # ── Estructuras de resultado ──────────────────────────────────────────────────
@@ -59,7 +59,7 @@ class InferenceEngine:
         context = dict(known)   # copia local; se va enriqueciendo con derivados
         steps: list[ProofStep] = []
 
-        value = self._prove_recursive(goal, context, steps, depth=0)
+        value = self._prove_recursive(goal, context, steps, depth=0, proving=frozenset())
 
         if value is not None:
             return ProofResult(success=True, goal=goal, value=value, steps=steps)
@@ -83,6 +83,7 @@ class InferenceEngine:
         context: dict,
         steps: list[ProofStep],
         depth: int,
+        proving: frozenset,         # variables que ya están siendo probadas en esta rama
     ) -> float | None:
 
         if depth > MAX_DEPTH:
@@ -92,9 +93,16 @@ class InferenceEngine:
         if goal in context:
             return context[goal]
 
+        # Detección de ciclos: si ya estamos intentando probar `goal`
+        # en esta rama, no lo intentemos de nuevo
+        if goal in proving:
+            return None
+
+        proving = proving | {goal}  # rama inmutable — no afecta otras ramas
+
         # Intentar cada teorema candidato en orden de registro
         for theorem in self._kb.theorems_for(goal):
-            result = self._try_theorem(theorem, goal, context, steps, depth)
+            result = self._try_theorem(theorem, goal, context, steps, depth, proving)
             if result is not None:
                 return result
 
@@ -107,6 +115,7 @@ class InferenceEngine:
         context: dict,
         steps: list[ProofStep],
         depth: int,
+        proving: frozenset,
     ) -> float | None:
 
         # ── Paso 1: verificar hipótesis ──────────────────────────────────────
@@ -131,7 +140,7 @@ class InferenceEngine:
         # ── Paso 3: probar variables faltantes recursivamente ────────────────
         missing = expr.required_variables - set(context.keys())
         for var in missing:
-            sub_value = self._prove_recursive(var, context, steps, depth + 1)
+            sub_value = self._prove_recursive(var, context, steps, depth + 1, proving)
             if sub_value is None:
                 return None  # no hay forma de obtener una variable requerida
             context[var] = sub_value  # enriquecer contexto con el derivado
@@ -143,12 +152,18 @@ class InferenceEngine:
             return None
 
         # ── Paso 5: verificar hipótesis diferidas con el valor calculado ─────
+        # True  → satisfecha, registrar
+        # False → el resultado viola la condición, descartar
+        # None  → la variable sigue ausente, la hipótesis no aplica aquí
         context[goal] = value
         for hyp in deferred:
-            if hyp.verify(context) is not True:
+            result = hyp.verify(context)
+            if result is False:
                 context.pop(goal)
-                return None          # el resultado viola una condición post-cálculo
-            verified.append(hyp.description)
+                return None
+            elif result is True:
+                verified.append(hyp.description)
+            # None → ignorar, no es relevante para este cálculo
         steps.append(ProofStep(
             theorem_name=theorem.name,
             goal=goal,
