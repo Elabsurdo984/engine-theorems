@@ -14,7 +14,13 @@ A console program that, given known data and a goal variable, automatically find
 ## Installation
 
 ```bash
-pip install sympy
+pip install -r requirements.txt
+```
+
+For development (includes pytest):
+
+```bash
+pip install -r requirements-dev.txt
 ```
 
 ## Usage
