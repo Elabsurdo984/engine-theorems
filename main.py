@@ -1,12 +1,14 @@
 from core.knowledge import KnowledgeBase
 from ui.console import ConsoleApp
 import domains.geometry as geometry
+import domains.physics as physics
 
 
 def build_knowledge_base() -> KnowledgeBase:
     """Construye y retorna la base de conocimiento con todos los dominios."""
     kb = KnowledgeBase()
     geometry.register(kb)
+    physics.register(kb)
     return kb
 
 
