@@ -1,18 +1,24 @@
 from core.engine import InferenceEngine
-from core.explainer import Explainer
+from core.explainer import Explainer, _format_number
+from core.expression import Expression
 from core.knowledge import KnowledgeBase
+from core.theorem import Theorem
 
-SEP = "=" * 52
+SEP_HEAVY = "=" * 52
+SEP_LIGHT = "-" * 52
 
 
 class ConsoleApp:
     """
     Interfaz de consola del motor de teoremas.
 
-    Responsabilidades:
-    - Interactuar con el usuario (input/output).
-    - Delegar el cálculo al InferenceEngine.
-    - Delegar la explicación al Explainer.
+    Flujo de una sesion:
+      1. Elegir dominio
+      2. Elegir teorema
+      3. Elegir que variable calcular
+      4. El sistema muestra que datos se necesitan
+      5. Usuario ingresa los valores
+      6. Motor calcula y explica el resultado
     """
 
     def __init__(self, kb: KnowledgeBase):
@@ -31,72 +37,142 @@ class ConsoleApp:
                 print("\n\nHasta luego.")
                 break
 
-            respuesta = input("\n¿Calcular otra cosa? (s/n): ").strip().lower()
+            print()
+            respuesta = input("Calcular otra cosa? (s/n): ").strip().lower()
             if respuesta != "s":
                 print("Hasta luego.")
                 break
 
-    # ── Sesión individual ─────────────────────────────────────────────────────
+    # ── Sesion ────────────────────────────────────────────────────────────────
 
     def _session(self) -> None:
-        goal = self._ask_goal()
-        if not goal:
+        # Paso 1: elegir dominio
+        domain = self._select_domain()
+        if domain is None:
             return
 
-        known = self._ask_known_variables(goal)
+        # Paso 2: elegir teorema
+        theorem = self._select_theorem(domain)
+        if theorem is None:
+            return
+
+        # Paso 3: elegir variable a calcular
+        goal = self._select_goal(theorem)
+        if goal is None:
+            return
+
+        # Paso 4 y 5: mostrar qué se necesita y pedir valores
+        known = self._ask_inputs(theorem, goal)
         if known is None:
             return
 
+        # Paso 6: calcular y explicar
         result = self._engine.prove(goal, known)
         print()
         print(self._explainer.explain(result, known))
 
-    # ── Input ─────────────────────────────────────────────────────────────────
+    # ── Selección de dominio ──────────────────────────────────────────────────
 
-    def _ask_goal(self) -> str | None:
-        """Pregunta qué variable calcular y valida que exista en el KB."""
-        available = sorted(self._kb.known_goals())
-        print(f"\nVariables calculables: {', '.join(available)}")
+    def _select_domain(self) -> str | None:
+        domains = sorted({t.domain for t in self._kb.all_theorems()})
 
-        goal = input("¿Que variable quieres calcular? ").strip()
-        if not goal:
+        print(f"\n{SEP_LIGHT}")
+        print("  Dominios disponibles:")
+        for i, domain in enumerate(domains, 1):
+            print(f"    [{i}] {domain.capitalize()}")
+
+        choice = self._pick("Selecciona un dominio", len(domains))
+        if choice is None:
             return None
+        return domains[choice - 1]
 
-        if goal not in self._kb.known_goals():
-            print(f"  [!] No hay ningun teorema que calcule '{goal}'.")
-            print(f"      Variables disponibles: {', '.join(available)}")
+    # ── Selección de teorema ──────────────────────────────────────────────────
+
+    def _select_theorem(self, domain: str) -> Theorem | None:
+        theorems = self._kb.theorems_by_domain(domain)
+
+        print(f"\n  Teoremas en {domain.capitalize()}:")
+        for i, t in enumerate(theorems, 1):
+            print(f"    [{i}] {t.name}")
+            print(f"        {t.description}")
+
+        choice = self._pick("Selecciona un teorema", len(theorems))
+        if choice is None:
             return None
+        return theorems[choice - 1]
 
-        return goal
+    # ── Selección de variable objetivo ────────────────────────────────────────
 
-    def _ask_known_variables(self, goal: str) -> dict | None:
-        """Pide los valores conocidos uno a uno hasta que el usuario termine."""
-        print(f"\nIngresa los datos conocidos para calcular '{goal}'.")
-        print("(Presiona Enter sin escribir nada para terminar.)\n")
+    def _select_goal(self, theorem: Theorem) -> str | None:
+        print(f"\n{SEP_LIGHT}")
+        print(f"  {theorem.name}")
+        print(f"  Variables:")
+        for var, desc in theorem.variables.items():
+            print(f"    {var} : {desc}")
 
+        print()
+        conclusions = theorem.conclusions
+        print("  Que variable quieres calcular?")
+        for i, c in enumerate(conclusions, 1):
+            print(f"    [{i}] {c.variable} — {c.description}")
+
+        choice = self._pick("Selecciona", len(conclusions))
+        if choice is None:
+            return None
+        return conclusions[choice - 1].variable
+
+    # ── Ingreso de datos ──────────────────────────────────────────────────────
+
+    def _ask_inputs(self, theorem: Theorem, goal: str) -> dict | None:
+        conclusion = theorem.conclusion_for(goal)
+        expr = Expression(conclusion.expression)
+        needed = sorted(expr.required_variables)
+
+        print(f"\n{SEP_LIGHT}")
+        print(f"  Para calcular '{goal}' necesitas proporcionar:")
+        for var in needed:
+            desc = theorem.variables.get(var, "")
+            label = f"    {var}" + (f" ({desc})" if desc else "")
+            print(label)
+
+        print()
         known = {}
+        for var in needed:
+            desc = theorem.variables.get(var, "")
+            prompt = f"  Valor de '{var}'" + (f" ({desc})" if desc else "") + ": "
+            while True:
+                raw = input(prompt).strip()
+                try:
+                    known[var] = float(raw.replace(",", "."))
+                    break
+                except ValueError:
+                    print(f"  [!] '{raw}' no es un numero valido.")
+
+        return known
+
+    # ── Helpers ───────────────────────────────────────────────────────────────
+
+    def _pick(self, prompt: str, max_choice: int) -> int | None:
+        """Pide al usuario un numero entre 1 y max_choice. Retorna None si cancela."""
         while True:
-            var = input("  Variable (o Enter para terminar): ").strip()
-            if not var:
-                break
-            if var == goal:
-                print(f"  [!] '{goal}' es la variable a calcular, no un dato.")
-                continue
-            value_str = input(f"  Valor de '{var}': ").strip()
+            raw = input(f"\n  {prompt} (1-{max_choice}): ").strip()
+            if not raw:
+                return None
             try:
-                known[var] = float(value_str)
+                n = int(raw)
+                if 1 <= n <= max_choice:
+                    return n
+                print(f"  [!] Ingresa un numero entre 1 y {max_choice}.")
             except ValueError:
-                print(f"  [!] '{value_str}' no es un numero valido. Intenta de nuevo.")
+                print(f"  [!] '{raw}' no es un numero valido.")
 
-        return known if known else None
-
-    # ── Output ────────────────────────────────────────────────────────────────
+    # ── Bienvenida ────────────────────────────────────────────────────────────
 
     def _print_welcome(self) -> None:
-        print(SEP)
+        print(SEP_HEAVY)
         print("  Motor de Teoremas")
-        print(SEP)
-        print("  Ingresa un objetivo y los datos conocidos.")
-        print("  El motor encontrara el teorema que aplica")
-        print("  y explicara el procedimiento paso a paso.")
-        print(SEP)
+        print(SEP_HEAVY)
+        print("  Selecciona un teorema, elige que variable")
+        print("  calcular, ingresa los datos conocidos y el")
+        print("  motor explicara el procedimiento paso a paso.")
+        print(SEP_HEAVY)
