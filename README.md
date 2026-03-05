@@ -8,8 +8,9 @@ A console program that, given known data and a goal variable, automatically find
 - Backward chaining inference engine
 - Automatic hypothesis verification
 - Symbolic algebra via SymPy
-- Step-by-step reasoning explanation
-- Multi-domain support (geometry, algebra, physics, etc.)
+- Step-by-step reasoning with units
+- Guided selection: domain → theorem → variable → inputs
+- Multi-domain support (geometry, physics, electricity)
 
 ## Installation
 
@@ -29,43 +30,79 @@ pip install -r requirements-dev.txt
 python main.py
 ```
 
-Example session:
+Example session (kinematics — final velocity):
 
 ```
 ====================================================
   Motor de Teoremas
 ====================================================
-
-Variables calculables: a, b, c
-Que variable quieres calcular? c
-
-Ingresa los datos conocidos para calcular 'c'.
-
-  Variable: a
-  Valor de 'a': 3
-  Variable: b
-  Valor de 'b': 4
-  Variable:
-
-====================================================
-  Objetivo: calcular 'c'
-  Datos conocidos: a=3, b=4
+  Selecciona un teorema, elige que variable
+  calcular, ingresa los datos conocidos y el
+  motor explicara el procedimiento paso a paso.
 ====================================================
 
-Paso 1 -- Teorema de Pitagoras
+----------------------------------------------------
+  Dominios disponibles:
+    [1] Electricidad
+    [2] Fisica
+    [3] Geometria
+
+  Selecciona un dominio (1-3): 2
+
+  Teoremas en Fisica:
+    [1] Cinematica: velocidad y tiempo
+        v = v0 + a*t
+    [2] Cinematica: desplazamiento y tiempo
+        d = v0*t + a*t^2/2
+    ...
+
+  Selecciona un teorema (1-4): 1
+
+----------------------------------------------------
+  Cinematica: velocidad y tiempo
+  Variables:
+    v0 : velocidad inicial (m/s)
+    v  : velocidad final (m/s)
+    a  : aceleracion (m/s^2)
+    t  : tiempo (s)
+
+  Que variable quieres calcular?
+    [1] v  — velocidad final
+    [2] v0 — velocidad inicial
+    [3] a  — aceleracion
+    [4] t  — tiempo
+
+  Selecciona (1-4): 1
+
+----------------------------------------------------
+  Para calcular 'v' necesitas proporcionar:
+    v0 (velocidad inicial (m/s))
+    a  (aceleracion (m/s^2))
+    t  (tiempo (s))
+
+  Valor de 'v0' (velocidad inicial (m/s)): 0
+  Valor de 'a' (aceleracion (m/s^2)): 10
+  Valor de 't' (tiempo (s)): 3
+
+====================================================
+  Objetivo: calcular 'v'
+  Datos conocidos: v0=0, a=10, t=3
+====================================================
+
+Paso 1 -- Cinematica: velocidad y tiempo
   Hipotesis verificadas:
-    [OK] a > 0
-    [OK] b > 0
+    [OK] t > 0
+    [OK] a != 0
   Formula:
-    c = sqrt(a**2 + b**2)
+    v = v0 + a*t
   Sustitucion:
-    c = 5
+    v = 30
   Resultado:
-    c = 5
+    v = 30 m/s
   ----------------------------------------------------
 
   Resultado final:
-    c = 5
+    v = 30 m/s
 
 ====================================================
 ```
@@ -82,7 +119,9 @@ motor-teoremas/
 │   ├── engine.py        # Inference engine (backward chaining)
 │   └── explainer.py     # Step-by-step explanation generator
 ├── domains/
-│   └── geometry.py      # Geometry theorems (e.g. Pythagorean theorem)
+│   ├── geometry.py      # Pythagorean theorem, Law of Cosines
+│   ├── physics.py       # Kinematics (4 equations)
+│   └── electricity.py   # Ohm's Law, power equations
 ├── ui/
 │   └── console.py       # Console interface
 └── tests/               # Per-module tests (pytest)
@@ -105,7 +144,7 @@ MY_THEOREM = Theorem(
         Hypothesis("x > 0", lambda ctx: ctx["x"] > 0),
     ],
     conclusions=[
-        Conclusion("y", "x * 2", "y is twice x"),
+        Conclusion("y", "x * 2", "y is twice x", unit="m/s"),
     ],
 )
 ```

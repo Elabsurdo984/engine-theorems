@@ -15,14 +15,16 @@ python -m pytest tests/test_engine.py -v  # run specific module tests
 ## Architecture
 
 ```
-core/theorem.py     # Data structures (Theorem, Hypothesis, Conclusion)
-core/expression.py  # SymPy wrapper (parse, evaluate, solve)
-core/knowledge.py   # KnowledgeBase with inverted index: goal -> [theorems]
-core/engine.py      # Backward chaining inference engine
-core/explainer.py   # Step-by-step explanation formatter
-domains/geometry.py # Theorem definitions (Pythagorean theorem)
-ui/console.py       # Console interface
-main.py             # Entry point — registers domains, starts UI
+core/theorem.py        # Data structures (Theorem, Hypothesis, Conclusion)
+core/expression.py     # SymPy wrapper (parse, evaluate, solve)
+core/knowledge.py      # KnowledgeBase with inverted index: goal -> [theorems]
+core/engine.py         # Backward chaining inference engine
+core/explainer.py      # Step-by-step explanation formatter
+domains/geometry.py    # Pythagorean theorem, Law of Cosines
+domains/physics.py     # Kinematics: 4 equations (v=v0+at, d=v0t+at²/2, etc.)
+domains/electricity.py # Ohm's Law, 3 power equations
+ui/console.py          # Console interface (guided selection flow)
+main.py                # Entry point — registers domains, starts UI
 ```
 
 ## Key Design Decisions
@@ -32,7 +34,7 @@ main.py             # Entry point — registers domains, starts UI
 **Hypothesis tri-state** — `Hypothesis.verify()` returns `True`, `False`, or `None`:
 - `True` — condition satisfied
 - `False` — condition violated, theorem does not apply
-- `None` — required variable not yet in context (KeyError), deferred until after computation
+- `None` — required variable not yet in context (KeyError), deferred until after computation. If still `None` after computation, the hypothesis is ignored (not applicable to this calculation).
 
 **SymPy as backend** — SymPy handles symbolic parsing, numeric evaluation, and equation solving. The rest of the logic (which theorem to apply, hypothesis checking, step recording) is custom.
 
@@ -41,6 +43,10 @@ main.py             # Entry point — registers domains, starts UI
 **Immutable known dict** — `engine.prove()` works on an internal copy of `known`. The caller's dict is never mutated.
 
 **context_used in ProofStep** — each step stores a snapshot of the context at evaluation time so the explainer can show variable substitution.
+
+**Cycle detection** — `_prove_recursive` receives a `proving: frozenset` of variables currently being proved in the current branch. If the goal is already in `proving`, return `None` immediately to avoid infinite recursion.
+
+**Units** — `Conclusion` has a `unit: str = ""` field. `ProofStep` carries the unit through. The explainer appends the unit to result lines (e.g. `v = 30 m/s`).
 
 ## Adding a New Theorem
 
@@ -63,3 +69,4 @@ Follow the pattern in `domains/geometry.py`:
 - Each `core/` module has a corresponding `tests/test_<module>.py`.
 - Tests use `pytest.approx` for float comparisons.
 - Domain files contain only theorem declarations — no logic.
+- SymPy reserves uppercase `I` as the imaginary unit `sqrt(-1)`. Use lowercase `i` for electric current and avoid other SymPy reserved names (`E`, `S`, `N`, `Q`, `pi`).
