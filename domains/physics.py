@@ -38,10 +38,10 @@ CINEMATICA_VT = Theorem(
         Hypothesis("a != 0", lambda ctx: ctx["a"] != 0),
     ],
     conclusions=[
-        Conclusion("v",  "v0 + a*t",       "velocidad final"),
-        Conclusion("v0", "v - a*t",         "velocidad inicial"),
-        Conclusion("a",  "(v - v0) / t",    "aceleracion"),
-        Conclusion("t",  "(v - v0) / a",    "tiempo"),
+        Conclusion("v",  "v0 + a*t",       "velocidad final",    unit="m/s"),
+        Conclusion("v0", "v - a*t",         "velocidad inicial",  unit="m/s"),
+        Conclusion("a",  "(v - v0) / t",    "aceleracion",        unit="m/s^2"),
+        Conclusion("t",  "(v - v0) / a",    "tiempo",             unit="s"),
     ],
 )
 
@@ -61,9 +61,9 @@ CINEMATICA_DT = Theorem(
         Hypothesis("t > 0", lambda ctx: ctx["t"] > 0),
     ],
     conclusions=[
-        Conclusion("d",  "v0*t + a*t**2/2",          "desplazamiento"),
-        Conclusion("v0", "(2*d - a*t**2) / (2*t)",   "velocidad inicial"),
-        Conclusion("a",  "2*(d - v0*t) / t**2",      "aceleracion"),
+        Conclusion("d",  "v0*t + a*t**2/2",          "desplazamiento",   unit="m"),
+        Conclusion("v0", "(2*d - a*t**2) / (2*t)",   "velocidad inicial", unit="m/s"),
+        Conclusion("a",  "2*(d - v0*t) / t**2",      "aceleracion",      unit="m/s^2"),
     ],
 )
 
@@ -83,10 +83,10 @@ CINEMATICA_VD = Theorem(
         Hypothesis("d != 0", lambda ctx: ctx["d"] != 0),
     ],
     conclusions=[
-        Conclusion("v",  "sqrt(v0**2 + 2*a*d)",            "velocidad final"),
-        Conclusion("v0", "sqrt(v**2 - 2*a*d)",             "velocidad inicial"),
-        Conclusion("a",  "(v**2 - v0**2) / (2*d)",         "aceleracion"),
-        Conclusion("d",  "(v**2 - v0**2) / (2*a)",         "desplazamiento"),
+        Conclusion("v",  "sqrt(v0**2 + 2*a*d)",    "velocidad final",   unit="m/s"),
+        Conclusion("v0", "sqrt(v**2 - 2*a*d)",     "velocidad inicial", unit="m/s"),
+        Conclusion("a",  "(v**2 - v0**2) / (2*d)", "aceleracion",       unit="m/s^2"),
+        Conclusion("d",  "(v**2 - v0**2) / (2*a)", "desplazamiento",    unit="m"),
     ],
 )
 
@@ -106,10 +106,10 @@ CINEMATICA_DM = Theorem(
         Hypothesis("v0 + v != 0",  lambda ctx: ctx["v0"] + ctx["v"] != 0),
     ],
     conclusions=[
-        Conclusion("d",  "(v0 + v)*t / 2",   "desplazamiento"),
-        Conclusion("v0", "2*d/t - v",         "velocidad inicial"),
-        Conclusion("v",  "2*d/t - v0",        "velocidad final"),
-        Conclusion("t",  "2*d / (v0 + v)",    "tiempo"),
+        Conclusion("d",  "(v0 + v)*t / 2",  "desplazamiento",   unit="m"),
+        Conclusion("v0", "2*d/t - v",        "velocidad inicial", unit="m/s"),
+        Conclusion("v",  "2*d/t - v0",       "velocidad final",  unit="m/s"),
+        Conclusion("t",  "2*d / (v0 + v)",   "tiempo",           unit="s"),
     ],
 )
 

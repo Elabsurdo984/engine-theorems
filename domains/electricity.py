@@ -37,9 +37,9 @@ OHM = Theorem(
         Hypothesis("i != 0", lambda ctx: ctx["i"] != 0),
     ],
     conclusions=[
-        Conclusion("V", "i * R",  "tension"),
-        Conclusion("i", "V / R",  "corriente"),
-        Conclusion("R", "V / i",  "resistencia"),
+        Conclusion("V", "i * R",  "tension",      unit="V"),
+        Conclusion("i", "V / R",  "corriente",    unit="A"),
+        Conclusion("R", "V / i",  "resistencia",  unit="Ohm"),
     ],
 )
 
@@ -56,9 +56,9 @@ POTENCIA_VI = Theorem(
         Hypothesis("i != 0", lambda ctx: ctx["i"] != 0),
     ],
     conclusions=[
-        Conclusion("P", "V * i",  "potencia"),
-        Conclusion("V", "P / i",  "tension"),
-        Conclusion("i", "P / V",  "corriente"),
+        Conclusion("P", "V * i",  "potencia",   unit="W"),
+        Conclusion("V", "P / i",  "tension",    unit="V"),
+        Conclusion("i", "P / V",  "corriente",  unit="A"),
     ],
 )
 
@@ -76,9 +76,9 @@ POTENCIA_IR = Theorem(
         Hypothesis("P > 0", lambda ctx: ctx["P"] > 0),
     ],
     conclusions=[
-        Conclusion("P", "i**2 * R",      "potencia"),
-        Conclusion("i", "sqrt(P / R)",   "corriente"),
-        Conclusion("R", "P / i**2",      "resistencia"),
+        Conclusion("P", "i**2 * R",      "potencia",     unit="W"),
+        Conclusion("i", "sqrt(P / R)",   "corriente",    unit="A"),
+        Conclusion("R", "P / i**2",      "resistencia",  unit="Ohm"),
     ],
 )
 
@@ -96,9 +96,9 @@ POTENCIA_VR = Theorem(
         Hypothesis("P > 0", lambda ctx: ctx["P"] > 0),
     ],
     conclusions=[
-        Conclusion("P", "V**2 / R",      "potencia"),
-        Conclusion("V", "sqrt(P * R)",   "tension"),
-        Conclusion("R", "V**2 / P",      "resistencia"),
+        Conclusion("P", "V**2 / R",      "potencia",     unit="W"),
+        Conclusion("V", "sqrt(P * R)",   "tension",      unit="V"),
+        Conclusion("R", "V**2 / P",      "resistencia",  unit="Ohm"),
     ],
 )
 

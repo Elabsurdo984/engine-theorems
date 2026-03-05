@@ -30,6 +30,7 @@ class Conclusion:
     variable: str    # qué variable produce este teorema
     expression: str  # expresión compatible con SymPy, e.g. "sqrt(a**2 + b**2)"
     description: str # explicación en lenguaje natural
+    unit: str = ""   # unidad del resultado, e.g. "m/s", "V", "W"
 
 
 @dataclass

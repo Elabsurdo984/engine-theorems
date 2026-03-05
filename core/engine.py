@@ -17,6 +17,7 @@ class ProofStep:
     numeric_value: float            # resultado numérico
     hypotheses_checked: list[str]   # descripciones de hipótesis verificadas
     context_used: dict              # valores de variables en el momento del cálculo
+    unit: str = ""                  # unidad del resultado, e.g. "m/s"
 
 
 @dataclass
@@ -170,7 +171,8 @@ class InferenceEngine:
             expression_str=conclusion.expression,
             numeric_value=value,
             hypotheses_checked=verified,
-            context_used=dict(context),  # snapshot del contexto en este momento
+            context_used=dict(context),
+            unit=conclusion.unit,
         ))
 
         return value

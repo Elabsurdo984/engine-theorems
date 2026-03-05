@@ -42,7 +42,7 @@ class Explainer:
         else:
             for i, step in enumerate(result.steps, start=1):
                 lines += self._step(i, step, known)
-            lines += self._summary(result)
+            lines += self._summary(result, result.steps[-1].unit if result.steps else "")
 
         lines.append(self.SEP_HEAVY)
         return "\n".join(lines)
@@ -73,21 +73,26 @@ class Explainer:
                             if k != step.goal}
         substituted = _substitute(step.expression_str, ctx_without_goal)
         if substituted != step.expression_str:
+            try:
+                substituted = _format_number(float(substituted))
+            except (ValueError, TypeError):
+                pass
             lines.append("  Sustitucion:")
             lines.append(f"    {step.goal} = {substituted}")
 
         # Resultado
+        unit_str = f" {step.unit}" if step.unit else ""
         lines.append("  Resultado:")
-        lines.append(f"    {step.goal} = {_format_number(step.numeric_value)}")
-
+        lines.append(f"    {step.goal} = {_format_number(step.numeric_value)}{unit_str}")
         lines.append("  " + self.SEP_LIGHT)
         return lines
 
-    def _summary(self, result: ProofResult) -> list[str]:
+    def _summary(self, result: ProofResult, unit: str = "") -> list[str]:
+        unit_str = f" {unit}" if unit else ""
         return [
             "",
             "  Resultado final:",
-            f"    {result.goal} = {_format_number(result.value)}",
+            f"    {result.goal} = {_format_number(result.value)}{unit_str}",
             "",
         ]
 
