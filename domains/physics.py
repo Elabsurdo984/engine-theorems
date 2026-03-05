@@ -140,6 +140,32 @@ LEY_DE_NEWTON = Theorem(
     ],
 )
 
+# ── Energia cinetica: Ec = m * v^2 / 2 ───────────────────────────────────────
+#
+# Relaciona energia cinetica, masa y velocidad.
+# Comparte 'm' con la Ley de Newton y 'v' con cinematica,
+# lo que permite encadenamiento automatico entre teoremas.
+
+ENERGIA_CINETICA = Theorem(
+    name="Energia cinetica",
+    domain="fisica",
+    description="Ec = m * v^2 / 2",
+    variables={
+        "Ec": "energia cinetica (Joules)",
+        "m": "masa (kg)",
+        "v": "velocidad (m/s)",
+    },
+    hypotheses=[
+        Hypothesis("m > 0", lambda ctx: ctx["m"] > 0),
+        Hypothesis("Ec > 0", lambda ctx: ctx["Ec"] > 0),
+    ],
+    conclusions=[
+        Conclusion("Ec", "m * v**2 / 2", "energia cinetica", unit="J"),
+        Conclusion("m", "2 * Ec / v**2", "masa", unit="kg"),
+        Conclusion("v", "sqrt(2 * Ec / m)", "velocidad", unit="m/s"),
+    ]
+)
+
 
 # ── Registro ──────────────────────────────────────────────────────────────────
 
@@ -149,6 +175,7 @@ _THEOREMS = [
     CINEMATICA_VD,
     CINEMATICA_DM,
     LEY_DE_NEWTON,
+    ENERGIA_CINETICA,
 ]
 
 
