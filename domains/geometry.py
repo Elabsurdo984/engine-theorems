@@ -129,12 +129,42 @@ AREA_CIRCULO = Theorem(
 )
 
 
+# ── Area del triangulo ────────────────────────────────────────────────────────
+#
+# area = base * altura / 2
+#
+# Nota: usa la misma variable 'area' que AREA_CIRCULO. El motor elige
+# el teorema correcto segun los datos disponibles: si hay 'r' usa el circulo,
+# si hay 'base' y 'altura' usa el triangulo.
+
+AREA_TRIANGULO = Theorem(
+    name="Area del triangulo",
+    domain="geometria",
+    description="area = base * altura / 2",
+    variables={
+        "base":   "base del triangulo (m)",
+        "altura": "altura del triangulo (m)",
+        "area":   "area (m^2)",
+    },
+    hypotheses=[
+        Hypothesis("base > 0",   lambda ctx: ctx["base"] > 0),
+        Hypothesis("altura > 0", lambda ctx: ctx["altura"] > 0),
+    ],
+    conclusions=[
+        Conclusion("area",   "base * altura / 2", "area a partir de base y altura", unit="m^2"),
+        Conclusion("base",   "2 * area / altura",  "base a partir de area y altura", unit="m"),
+        Conclusion("altura", "2 * area / base",    "altura a partir de area y base", unit="m"),
+    ],
+)
+
+
 # ── Registro ──────────────────────────────────────────────────────────────────
 
 _THEOREMS = [
     PITAGORAS,
     LEY_DE_COSENOS,
     AREA_CIRCULO,
+    AREA_TRIANGULO,
 ]
 
 
