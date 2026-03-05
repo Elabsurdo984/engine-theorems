@@ -114,6 +114,33 @@ CINEMATICA_DM = Theorem(
 )
 
 
+# ── Segunda Ley de Newton: F = m * a ──────────────────────────────────────────
+#
+# Relaciona fuerza, masa y aceleracion.
+# Comparte la variable 'a' con cinematica: si se conocen F y m,
+# el motor puede derivar 'a' y usarla automaticamente en cualquier
+# ecuacion cinematica.
+
+LEY_DE_NEWTON = Theorem(
+    name="Segunda Ley de Newton",
+    domain="fisica",
+    description="F = m * a",
+    variables={
+        "F": "fuerza (N)",
+        "m": "masa (kg)",
+        "a": "aceleracion (m/s^2)",
+    },
+    hypotheses=[
+        Hypothesis("m > 0", lambda ctx: ctx["m"] > 0),
+    ],
+    conclusions=[
+        Conclusion("F", "m * a",  "fuerza",       unit="N"),
+        Conclusion("m", "F / a",  "masa",          unit="kg"),
+        Conclusion("a", "F / m",  "aceleracion",   unit="m/s^2"),
+    ],
+)
+
+
 # ── Registro ──────────────────────────────────────────────────────────────────
 
 _THEOREMS = [
@@ -121,6 +148,7 @@ _THEOREMS = [
     CINEMATICA_DT,
     CINEMATICA_VD,
     CINEMATICA_DM,
+    LEY_DE_NEWTON,
 ]
 
 
