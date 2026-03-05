@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +22,22 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
+
+      - name: Check syntax (compile all modules)
+        run: python -m compileall -q .
+
+      - name: Check imports
+        run: |
+          python -c "import core.theorem"
+          python -c "import core.expression"
+          python -c "import core.knowledge"
+          python -c "import core.engine"
+          python -c "import core.explainer"
+          python -c "import domains.geometry"
+          python -c "import domains.physics"
+          python -c "import domains.electricity"
+          python -c "import ui.console"
+          python -c "import main"
 
       - name: Run tests
         run: python -m pytest -v
