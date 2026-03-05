@@ -103,11 +103,38 @@ LEY_DE_COSENOS = Theorem(
 )
 
 
+# ── Area del circulo ──────────────────────────────────────────────────────────
+#
+# A = pi * r^2
+#
+# Nota: se usa 'area' (no 'A') para evitar conflicto con el angulo A
+# de la Ley de Cosenos, que tambien esta registrada en este dominio.
+
+AREA_CIRCULO = Theorem(
+    name="Area del circulo",
+    domain="geometria",
+    description="area = pi * r^2",
+    variables={
+        "r":    "radio (m)",
+        "area": "area (m^2)",
+    },
+    hypotheses=[
+        Hypothesis("r > 0",    lambda ctx: ctx["r"] > 0),
+        Hypothesis("area > 0", lambda ctx: ctx["area"] > 0),
+    ],
+    conclusions=[
+        Conclusion("area", "pi * r**2",    "area a partir del radio",   unit="m^2"),
+        Conclusion("r",    "sqrt(area / pi)", "radio a partir del area", unit="m"),
+    ],
+)
+
+
 # ── Registro ──────────────────────────────────────────────────────────────────
 
 _THEOREMS = [
     PITAGORAS,
     LEY_DE_COSENOS,
+    AREA_CIRCULO,
 ]
 
 
