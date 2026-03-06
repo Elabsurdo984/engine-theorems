@@ -12,16 +12,40 @@ A console program that, given known data and a goal variable, automatically find
 - Guided selection: domain → theorem → variable → inputs
 - Multi-domain support (geometry, physics, electricity)
 
+## Requirements
+
+- **Python 3.10 or later** (uses union type syntax `X | Y` from PEP 604)
+- Tested on Python 3.13
+
 ## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-For development (includes pytest):
+For development (includes pytest and coverage):
 
 ```bash
 pip install -r requirements-dev.txt
+```
+
+### Dependency management
+
+The project uses a two-file strategy for reproducible builds:
+
+| File | Purpose |
+|---|---|
+| `requirements.in` | Direct deps — edit this to add/remove packages |
+| `requirements.txt` | Lock file — all deps with exact versions, do not edit |
+| `requirements-dev.in` | Direct dev deps — edit this |
+| `requirements-dev.txt` | Dev lock file — do not edit |
+
+To update dependencies after editing a `.in` file:
+
+```bash
+pip install pip-tools
+pip-compile requirements.in
+pip-compile requirements-dev.in
 ```
 
 ## Usage

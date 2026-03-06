@@ -1,0 +1,5 @@
+# Dependencias directas de produccion.
+# Edita este archivo para cambiar dependencias.
+# Luego regenera el lock file con:
+#   pip-compile requirements.in
+sympy

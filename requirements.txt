@@ -1,1 +1,6 @@
+# Lock file de produccion. NO editar manualmente.
+# Generado con: pip-compile requirements.in
+# Para actualizar: pip-compile --upgrade requirements.in
+
+mpmath==1.3.0
 sympy==1.14.0

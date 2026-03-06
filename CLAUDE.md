@@ -62,6 +62,26 @@ Follow the pattern in `domains/geometry.py`:
 - `_THEOREMS` list
 - `register(kb: KnowledgeBase) -> None` function
 
+## Python Version Compatibility
+
+- **Minimum: Python 3.10** — required for union type syntax `X | Y` (PEP 604) used throughout `core/`.
+- **Tested on: Python 3.13**.
+- Do not use features from Python 3.11+ (e.g. `tomllib`, `ExceptionGroup`) without updating this constraint.
+
+## Dependency Management
+
+Two-file strategy for reproducible installs:
+
+- `requirements.in` / `requirements-dev.in` — direct dependencies, no version pins. Edit these.
+- `requirements.txt` / `requirements-dev.txt` — full lock files including transitive deps. Do not edit manually.
+
+To regenerate lock files after changing a `.in` file:
+```bash
+pip install pip-tools
+pip-compile requirements.in
+pip-compile requirements-dev.in
+```
+
 ## Conventions
 
 - No accented characters in user-facing strings (Windows cp1252 console encoding).

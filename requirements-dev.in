@@ -1,0 +1,7 @@
+# Dependencias directas de desarrollo.
+# Edita este archivo para cambiar dependencias.
+# Luego regenera el lock file con:
+#   pip-compile requirements-dev.in
+-r requirements.in
+pytest
+pytest-cov
