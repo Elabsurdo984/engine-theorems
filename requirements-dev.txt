@@ -7,9 +7,10 @@ mpmath==1.3.0
 sympy==1.14.0
 
 # desarrollo
-coverage==7.10.5
-iniconfig==2.0.0
-packaging==24.2
-pluggy==1.5.0
-pytest==8.3.2
-pytest-cov==6.2.1
+coverage==7.13.4
+iniconfig==2.3.0
+packaging==26.0
+pluggy==1.6.0
+pygments==2.19.2
+pytest==9.0.2
+pytest-cov==7.0.0
