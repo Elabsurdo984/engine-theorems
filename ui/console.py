@@ -1,3 +1,5 @@
+import math
+
 from core.engine import InferenceEngine
 from core.explainer import Explainer, _format_number
 from core.expression import Expression
@@ -36,6 +38,10 @@ class ConsoleApp:
             except KeyboardInterrupt:
                 print("\n\nHasta luego.")
                 break
+            except Exception as e:
+                print(f"\n  [!] Error inesperado: {e}")
+                print("  Intenta de nuevo.")
+                continue
 
             print()
             respuesta = input("Calcular otra cosa? (s/n): ").strip().lower()
@@ -49,21 +55,25 @@ class ConsoleApp:
         # Paso 1: elegir dominio
         domain = self._select_domain()
         if domain is None:
+            print("  Cancelado.")
             return
 
         # Paso 2: elegir teorema
         theorem = self._select_theorem(domain)
         if theorem is None:
+            print("  Cancelado.")
             return
 
         # Paso 3: elegir variable a calcular
         goal = self._select_goal(theorem)
         if goal is None:
+            print("  Cancelado.")
             return
 
         # Paso 4 y 5: mostrar qué se necesita y pedir valores
         known = self._ask_inputs(theorem, goal)
         if known is None:
+            print("  Cancelado.")
             return
 
         # Paso 6: calcular y explicar
@@ -134,6 +144,7 @@ class ConsoleApp:
             desc = theorem.variables.get(var, "")
             label = f"    {var}" + (f" ({desc})" if desc else "")
             print(label)
+        print("  (Enter en cualquier campo para cancelar)")
 
         print()
         known = {}
@@ -142,8 +153,14 @@ class ConsoleApp:
             prompt = f"  Valor de '{var}'" + (f" ({desc})" if desc else "") + ": "
             while True:
                 raw = input(prompt).strip()
+                if not raw:
+                    return None
                 try:
-                    known[var] = float(raw.replace(",", "."))
+                    value = float(raw.replace(",", "."))
+                    if not math.isfinite(value):
+                        print(f"  [!] El valor debe ser un numero finito.")
+                        continue
+                    known[var] = value
                     break
                 except ValueError:
                     print(f"  [!] '{raw}' no es un numero valido.")
@@ -155,7 +172,7 @@ class ConsoleApp:
     def _pick(self, prompt: str, max_choice: int) -> int | None:
         """Pide al usuario un numero entre 1 y max_choice. Retorna None si cancela."""
         while True:
-            raw = input(f"\n  {prompt} (1-{max_choice}): ").strip()
+            raw = input(f"\n  {prompt} (1-{max_choice}, Enter para cancelar): ").strip()
             if not raw:
                 return None
             try:

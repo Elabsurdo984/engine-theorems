@@ -204,6 +204,34 @@ class TestAskInputs:
         assert "calcular 'y'" in out
         assert "x" in out
 
+    def test_empty_input_cancels(self, app, theorem):
+        with patch("builtins.input", return_value=""):
+            result = app._ask_inputs(theorem, "y")
+        assert result is None
+
+    def test_prints_cancel_hint(self, app, theorem, capsys):
+        with patch("builtins.input", return_value="5"):
+            app._ask_inputs(theorem, "y")
+        assert "cancelar" in capsys.readouterr().out.lower()
+
+    def test_rejects_inf(self, app, theorem, capsys):
+        with patch("builtins.input", side_effect=["inf", "5"]):
+            known = app._ask_inputs(theorem, "y")
+        assert known == {"x": 5.0}
+        assert "finito" in capsys.readouterr().out
+
+    def test_rejects_negative_inf(self, app, theorem, capsys):
+        with patch("builtins.input", side_effect=["-inf", "5"]):
+            known = app._ask_inputs(theorem, "y")
+        assert known == {"x": 5.0}
+        assert "finito" in capsys.readouterr().out
+
+    def test_rejects_nan(self, app, theorem, capsys):
+        with patch("builtins.input", side_effect=["nan", "5"]):
+            known = app._ask_inputs(theorem, "y")
+        assert known == {"x": 5.0}
+        assert "finito" in capsys.readouterr().out
+
 
 # ── _session ──────────────────────────────────────────────────────────────────
 
@@ -223,17 +251,30 @@ class TestSession:
     def test_cancel_at_domain_skips_session(self, app, capsys):
         with patch("builtins.input", return_value=""):
             app._session()
-        assert "Resultado" not in capsys.readouterr().out
+        out = capsys.readouterr().out
+        assert "Resultado" not in out
+        assert "Cancelado" in out
 
     def test_cancel_at_theorem_skips_session(self, app, capsys):
         with patch("builtins.input", side_effect=["1", ""]):
             app._session()
-        assert "Resultado" not in capsys.readouterr().out
+        out = capsys.readouterr().out
+        assert "Resultado" not in out
+        assert "Cancelado" in out
 
     def test_cancel_at_goal_skips_session(self, app, capsys):
         with patch("builtins.input", side_effect=["1", "1", ""]):
             app._session()
-        assert "Resultado" not in capsys.readouterr().out
+        out = capsys.readouterr().out
+        assert "Resultado" not in out
+        assert "Cancelado" in out
+
+    def test_cancel_at_inputs_skips_session(self, app, capsys):
+        with patch("builtins.input", side_effect=["1", "1", "1", ""]):
+            app._session()
+        out = capsys.readouterr().out
+        assert "Resultado" not in out
+        assert "Cancelado" in out
 
     def test_second_goal_direction(self, app, capsys):
         # goal=2 (x), y=10 → x=5
@@ -280,3 +321,13 @@ class TestRun:
         # Solo una sesion
         out = capsys.readouterr().out
         assert out.count("Resultado final") == 1
+
+    def test_unexpected_exception_shows_error_and_continues(self, app, capsys):
+        # Primera llamada a input lanza una excepcion inesperada,
+        # la segunda sesion cancela limpiamente.
+        calls = [RuntimeError("fallo inesperado"), "", "n"]
+        with patch("builtins.input", side_effect=calls):
+            app.run()
+        out = capsys.readouterr().out
+        assert "Error inesperado" in out
+        assert "Hasta luego" in out
