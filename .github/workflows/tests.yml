@@ -25,11 +25,15 @@ jobs:
 
       - name: Verify lock files are up to date
         run: |
-          pip-compile --quiet requirements.in --output-file requirements.check.txt
-          pip-compile --quiet requirements-dev.in --output-file requirements-dev.check.txt
-          diff <(grep -v "^#" requirements.txt | grep -v "^$") <(grep -v "^#" requirements.check.txt | grep -v "^$") \
+          pip-compile --quiet --no-annotate --no-header --strip-extras requirements.in \
+            --output-file requirements.check.txt
+          pip-compile --quiet --no-annotate --no-header --strip-extras requirements-dev.in \
+            --output-file requirements-dev.check.txt
+          diff <(grep -v "^#" requirements.txt | grep -v "^$" | sort) \
+               <(sort requirements.check.txt) \
             || (echo "requirements.txt is out of date. Run: pip-compile requirements.in" && exit 1)
-          diff <(grep -v "^#" requirements-dev.txt | grep -v "^$") <(grep -v "^#" requirements-dev.check.txt | grep -v "^$") \
+          diff <(grep -v "^#" requirements-dev.txt | grep -v "^$" | sort) \
+               <(sort requirements-dev.check.txt) \
             || (echo "requirements-dev.txt is out of date. Run: pip-compile requirements-dev.in" && exit 1)
 
       - name: Install dependencies
