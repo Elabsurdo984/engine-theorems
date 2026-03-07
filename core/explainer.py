@@ -1,4 +1,4 @@
-import sympy
+from sympy import *
 from core.engine import ProofResult, ProofStep
 
 
@@ -14,8 +14,8 @@ def _substitute(expression_str: str, context: dict) -> str:
     Reemplaza los símbolos de una expresión por sus valores numéricos.
     Ejemplo: "sqrt(a**2 + b**2)" con {a:3, b:4} → "sqrt(3**2 + 4**2)"
     """
-    expr = sympy.sympify(expression_str)
-    sym_context = {sympy.Symbol(k): v for k, v in context.items()}
+    expr = sympify(expression_str)
+    sym_context = {Symbol(k): v for k, v in context.items()}
     substituted = expr.subs(sym_context)
     # Simplificar solo la forma de mostrado, no el valor final
     return str(substituted)
