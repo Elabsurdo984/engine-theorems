@@ -212,7 +212,7 @@ class TestAskInputs:
     def test_prints_cancel_hint(self, app, theorem, capsys):
         with patch("builtins.input", return_value="5"):
             app._ask_inputs(theorem, "y")
-        assert "cancelar" in capsys.readouterr().out.lower()
+        assert "volver" in capsys.readouterr().out.lower()
 
     def test_rejects_inf(self, app, theorem, capsys):
         with patch("builtins.input", side_effect=["inf", "5"]):
@@ -255,25 +255,28 @@ class TestSession:
         assert "Resultado" not in out
         assert "Cancelado" in out
 
-    def test_cancel_at_theorem_skips_session(self, app, capsys):
-        with patch("builtins.input", side_effect=["1", ""]):
+    def test_back_at_theorem_returns_to_domain(self, app, capsys):
+        # "" en teorema vuelve a dominio; segundo "" cancela la sesion
+        with patch("builtins.input", side_effect=["1", "", ""]):
             app._session()
         out = capsys.readouterr().out
-        assert "Resultado" not in out
+        assert out.count("Dominios disponibles") == 2
         assert "Cancelado" in out
 
-    def test_cancel_at_goal_skips_session(self, app, capsys):
-        with patch("builtins.input", side_effect=["1", "1", ""]):
+    def test_back_at_goal_returns_to_theorem(self, app, capsys):
+        # "" en goal vuelve a teorema; "" "" para cancelar
+        with patch("builtins.input", side_effect=["1", "1", "", "", ""]):
             app._session()
         out = capsys.readouterr().out
-        assert "Resultado" not in out
+        assert out.count("Teoremas en") == 2
         assert "Cancelado" in out
 
-    def test_cancel_at_inputs_skips_session(self, app, capsys):
-        with patch("builtins.input", side_effect=["1", "1", "1", ""]):
+    def test_back_at_inputs_returns_to_goal(self, app, capsys):
+        # "" en inputs vuelve a goal; "" "" "" para cancelar
+        with patch("builtins.input", side_effect=["1", "1", "1", "", "", "", ""]):
             app._session()
         out = capsys.readouterr().out
-        assert "Resultado" not in out
+        assert out.count("variable quieres calcular") == 2
         assert "Cancelado" in out
 
     def test_second_goal_direction(self, app, capsys):

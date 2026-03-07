@@ -52,31 +52,26 @@ class ConsoleApp:
     # ── Sesion ────────────────────────────────────────────────────────────────
 
     def _session(self) -> None:
-        # Paso 1: elegir dominio
-        domain = self._select_domain()
-        if domain is None:
-            print("  Cancelado.")
-            return
+        domain = theorem = goal = known = None
+        step = 0
 
-        # Paso 2: elegir teorema
-        theorem = self._select_theorem(domain)
-        if theorem is None:
-            print("  Cancelado.")
-            return
+        while step < 4:
+            if step == 0:
+                domain = self._select_domain()
+                if domain is None:
+                    print("  Cancelado.")
+                    return
+                step = 1
+            elif step == 1:
+                theorem = self._select_theorem(domain)
+                step = 0 if theorem is None else 2
+            elif step == 2:
+                goal = self._select_goal(theorem)
+                step = 1 if goal is None else 3
+            elif step == 3:
+                known = self._ask_inputs(theorem, goal)
+                step = 2 if known is None else 4
 
-        # Paso 3: elegir variable a calcular
-        goal = self._select_goal(theorem)
-        if goal is None:
-            print("  Cancelado.")
-            return
-
-        # Paso 4 y 5: mostrar qué se necesita y pedir valores
-        known = self._ask_inputs(theorem, goal)
-        if known is None:
-            print("  Cancelado.")
-            return
-
-        # Paso 6: calcular y explicar
         result = self._engine.prove(goal, known)
         print()
         print(self._explainer.explain(result, known))
@@ -106,7 +101,7 @@ class ConsoleApp:
             print(f"    [{i}] {t.name}")
             print(f"        {t.description}")
 
-        choice = self._pick("Selecciona un teorema", len(theorems))
+        choice = self._pick("Selecciona un teorema", len(theorems), cancel_label="volver")
         if choice is None:
             return None
         return theorems[choice - 1]
@@ -126,7 +121,7 @@ class ConsoleApp:
         for i, c in enumerate(conclusions, 1):
             print(f"    [{i}] {c.variable} — {c.description}")
 
-        choice = self._pick("Selecciona", len(conclusions))
+        choice = self._pick("Selecciona", len(conclusions), cancel_label="volver")
         if choice is None:
             return None
         return conclusions[choice - 1].variable
@@ -144,7 +139,7 @@ class ConsoleApp:
             desc = theorem.variables.get(var, "")
             label = f"    {var}" + (f" ({desc})" if desc else "")
             print(label)
-        print("  (Enter en cualquier campo para cancelar)")
+        print("  (Enter en cualquier campo para volver)")
 
         print()
         known = {}
@@ -169,10 +164,10 @@ class ConsoleApp:
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
-    def _pick(self, prompt: str, max_choice: int) -> int | None:
+    def _pick(self, prompt: str, max_choice: int, cancel_label: str = "cancelar") -> int | None:
         """Pide al usuario un numero entre 1 y max_choice. Retorna None si cancela."""
         while True:
-            raw = input(f"\n  {prompt} (1-{max_choice}, Enter para cancelar): ").strip()
+            raw = input(f"\n  {prompt} (1-{max_choice}, Enter para {cancel_label}): ").strip()
             if not raw:
                 return None
             try:
