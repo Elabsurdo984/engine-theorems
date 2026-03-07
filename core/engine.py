@@ -138,11 +138,23 @@ class InferenceEngine:
         conclusion = theorem.conclusion_for(goal)
         expr = Expression(conclusion.expression)
 
+        # Snapshot antes de mutar contexto o steps.
+        # Si el teorema falla en cualquier paso posterior, revertimos para
+        # que el siguiente candidato no herede variables derivadas aqui.
+        original_keys = set(context.keys())
+        steps_checkpoint = len(steps)
+
+        def _rollback() -> None:
+            for k in [k for k in context if k not in original_keys]:
+                del context[k]
+            del steps[steps_checkpoint:]
+
         # ── Paso 3: probar variables faltantes recursivamente ────────────────
-        missing = expr.required_variables - set(context.keys())
+        missing = expr.required_variables - original_keys
         for var in missing:
             sub_value = self._prove_recursive(var, context, steps, depth + 1, proving)
             if sub_value is None:
+                _rollback()
                 return None  # no hay forma de obtener una variable requerida
             context[var] = sub_value  # enriquecer contexto con el derivado
 
@@ -150,6 +162,7 @@ class InferenceEngine:
         try:
             value = expr.evaluate(context)
         except ExpressionError:
+            _rollback()
             return None
 
         # ── Paso 5: verificar hipótesis diferidas con el valor calculado ─────
@@ -160,7 +173,7 @@ class InferenceEngine:
         for hyp in deferred:
             result = hyp.verify(context)
             if result is False:
-                context.pop(goal)
+                _rollback()
                 return None
             elif result is True:
                 verified.append(hyp.description)
