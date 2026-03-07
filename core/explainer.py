@@ -1,4 +1,4 @@
-from sympy import *
+from sympy import sympify, Symbol
 from core.engine import ProofResult, ProofStep
 
 

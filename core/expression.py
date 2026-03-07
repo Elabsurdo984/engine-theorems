@@ -1,4 +1,4 @@
-from sympy import *
+from sympy import sympify, Symbol, Eq, solve, SympifyError
 
 
 class ExpressionError(Exception):
