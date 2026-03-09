@@ -34,8 +34,8 @@ CINEMATICA_VT = Theorem(
     description="v = v0 + a*t",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("t > 0",  lambda ctx: ctx["t"] > 0),
-        Hypothesis("a != 0", lambda ctx: ctx["a"] != 0),
+        Hypothesis("t > 0"),
+        Hypothesis("a != 0"),
     ],
     conclusions=[
         Conclusion("v",  "v0 + a*t",       "velocidad final",    unit="m/s"),
@@ -58,7 +58,7 @@ CINEMATICA_DT = Theorem(
     description="d = v0*t + a*t^2/2",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("t > 0", lambda ctx: ctx["t"] > 0),
+        Hypothesis("t > 0"),
     ],
     conclusions=[
         Conclusion("d",  "v0*t + a*t**2/2",          "desplazamiento",   unit="m"),
@@ -79,8 +79,8 @@ CINEMATICA_VD = Theorem(
     description="v^2 = v0^2 + 2*a*d",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("a != 0", lambda ctx: ctx["a"] != 0),
-        Hypothesis("d != 0", lambda ctx: ctx["d"] != 0),
+        Hypothesis("a != 0"),
+        Hypothesis("d != 0"),
     ],
     conclusions=[
         Conclusion("v",  "sqrt(v0**2 + 2*a*d)",    "velocidad final",   unit="m/s"),
@@ -102,8 +102,8 @@ CINEMATICA_DM = Theorem(
     description="d = (v0 + v)*t / 2",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("t > 0",        lambda ctx: ctx["t"] > 0),
-        Hypothesis("v0 + v != 0",  lambda ctx: ctx["v0"] + ctx["v"] != 0),
+        Hypothesis("t > 0"),
+        Hypothesis("v0 + v != 0"),
     ],
     conclusions=[
         Conclusion("d",  "(v0 + v)*t / 2",  "desplazamiento",   unit="m"),
@@ -131,7 +131,7 @@ LEY_DE_NEWTON = Theorem(
         "a": "aceleracion (m/s^2)",
     },
     hypotheses=[
-        Hypothesis("m > 0", lambda ctx: ctx["m"] > 0),
+        Hypothesis("m > 0"),
     ],
     conclusions=[
         Conclusion("F", "m * a",  "fuerza",       unit="N"),
@@ -156,8 +156,8 @@ ENERGIA_CINETICA = Theorem(
         "v": "velocidad (m/s)",
     },
     hypotheses=[
-        Hypothesis("m > 0", lambda ctx: ctx["m"] > 0),
-        Hypothesis("Ec > 0", lambda ctx: ctx["Ec"] > 0),
+        Hypothesis("m > 0"),
+        Hypothesis("Ec > 0"),
     ],
     conclusions=[
         Conclusion("Ec", "m * v**2 / 2", "energia cinetica", unit="J"),

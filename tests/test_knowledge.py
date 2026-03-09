@@ -28,8 +28,8 @@ def make_kb_with_pythagoras():
         description="c² = a² + b²",
         variables={"a": "cateto", "b": "cateto", "c": "hipotenusa"},
         hypotheses=[
-            Hypothesis("a > 0", lambda ctx: ctx["a"] > 0),
-            Hypothesis("b > 0", lambda ctx: ctx["b"] > 0),
+            Hypothesis("a > 0"),
+            Hypothesis("b > 0"),
         ],
         conclusions=[
             Conclusion("c", "sqrt(a**2 + b**2)", "hipotenusa dado a y b"),

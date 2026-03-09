@@ -4,34 +4,22 @@ from core.theorem import Hypothesis, Conclusion, Theorem
 # ── Hypothesis ──────────────────────────────────────────────────────────────
 
 def test_hypothesis_passes_when_condition_is_true():
-    h = Hypothesis(
-        description="a es positivo",
-        check=lambda ctx: ctx["a"] > 0,
-    )
+    h = Hypothesis("a > 0")
     assert h.verify({"a": 5}) is True
 
 
 def test_hypothesis_fails_when_condition_is_false():
-    h = Hypothesis(
-        description="a es positivo",
-        check=lambda ctx: ctx["a"] > 0,
-    )
+    h = Hypothesis("a > 0")
     assert h.verify({"a": -3}) is False
 
 
 def test_hypothesis_returns_none_on_missing_variable():
-    h = Hypothesis(
-        description="a es positivo",
-        check=lambda ctx: ctx["a"] > 0,
-    )
-    assert h.verify({}) is None  # KeyError → no se puede evaluar, diferir
+    h = Hypothesis("a > 0")
+    assert h.verify({}) is None  # NameError → no se puede evaluar, diferir
 
 
 def test_hypothesis_fails_gracefully_on_division_by_zero():
-    h = Hypothesis(
-        description="1/x es válido",
-        check=lambda ctx: (1 / ctx["x"]) > 0,
-    )
+    h = Hypothesis("1/x > 0")
     assert h.verify({"x": 0}) is False
 
 
@@ -44,8 +32,8 @@ def make_pythagorean_theorem():
         description="En un triángulo rectángulo: c² = a² + b²",
         variables={"a": "cateto", "b": "cateto", "c": "hipotenusa"},
         hypotheses=[
-            Hypothesis("a > 0", lambda ctx: ctx["a"] > 0),
-            Hypothesis("b > 0", lambda ctx: ctx["b"] > 0),
+            Hypothesis("a > 0"),
+            Hypothesis("b > 0"),
         ],
         conclusions=[
             Conclusion("c", "sqrt(a**2 + b**2)", "hipotenusa dado a y b"),

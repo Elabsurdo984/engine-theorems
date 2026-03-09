@@ -25,7 +25,7 @@ def _make_kb() -> KnowledgeBase:
         description="y = 2 * x",
         variables={"x": "valor de entrada", "y": "doble de x"},
         hypotheses=[
-            Hypothesis("x > 0", lambda ctx: ctx["x"] > 0),
+            Hypothesis("x > 0"),
         ],
         conclusions=[
             Conclusion("y", "2 * x", "doble", unit="u"),

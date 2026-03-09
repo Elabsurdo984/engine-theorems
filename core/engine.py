@@ -130,7 +130,7 @@ class InferenceEngine:
             if result is False:
                 return None          # hipótesis definitivamente violada
             elif result is True:
-                verified.append(hyp.description)
+                verified.append(hyp.condition)
             else:
                 deferred.append(hyp)  # no se puede evaluar aún
 
@@ -176,7 +176,7 @@ class InferenceEngine:
                 _rollback()
                 return None
             elif result is True:
-                verified.append(hyp.description)
+                verified.append(hyp.condition)
             # None → ignorar, no es relevante para este cálculo
         steps.append(ProofStep(
             theorem_name=theorem.name,

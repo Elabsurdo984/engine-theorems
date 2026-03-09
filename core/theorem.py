@@ -1,11 +1,10 @@
+import math
 from dataclasses import dataclass
-from typing import Callable
 
 
 @dataclass
 class Hypothesis:
-    description: str
-    check: Callable[[dict], bool]
+    condition: str  # expresión Python booleana, e.g. "a > 0", "a != 0", "0 < A < pi"
 
     def verify(self, context: dict) -> bool | None:
         """
@@ -14,12 +13,13 @@ class Hypothesis:
         Retorna:
           True   → condición satisfecha
           False  → condición violada (el teorema no aplica)
-          None   → variables requeridas ausentes en el contexto
+          None   → variable requerida ausente en el contexto
                    (no se puede evaluar todavía; el motor decide qué hacer)
         """
         try:
-            return bool(self.check(context))
-        except KeyError:
+            namespace = {"pi": math.pi, **context}
+            return bool(eval(self.condition, {"__builtins__": {}}, namespace))  # noqa: S307
+        except NameError:
             return None   # variable ausente — diferir evaluación
         except (ZeroDivisionError, TypeError, ValueError):
             return False  # error de cálculo — hipótesis violada

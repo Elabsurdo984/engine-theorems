@@ -9,8 +9,6 @@ Para agregar un nuevo teorema:
   3. Listo — register(kb) lo incluirá automáticamente.
 """
 
-import math
-
 from core.theorem import Theorem, Hypothesis, Conclusion
 from core.knowledge import KnowledgeBase
 
@@ -34,13 +32,14 @@ PITAGORAS = Theorem(
         "c": "hipotenusa",
     },
     hypotheses=[
-        Hypothesis("a > 0", lambda ctx: ctx["a"] > 0),
-        Hypothesis("b > 0", lambda ctx: ctx["b"] > 0),
-        Hypothesis("c > 0", lambda ctx: ctx["c"] > 0),
+        Hypothesis("a > 0"),
+        Hypothesis("b > 0"),
+        Hypothesis("c > 0"),
         # Pitagoras es un caso especial donde C = pi/2.
         # Si el angulo C es conocido y no es pi/2, este teorema no aplica
         # y debe usarse la Ley de Cosenos en su lugar.
-        Hypothesis("C = pi/2 (si se conoce)", lambda ctx: ctx.get("C", math.pi / 2) == math.pi / 2),
+        # Cuando C no esta en el contexto, la condicion se difiere y luego se ignora.
+        Hypothesis("C == pi/2"),
     ],
     conclusions=[
         Conclusion(
@@ -83,12 +82,12 @@ LEY_DE_COSENOS = Theorem(
         "C": "angulo opuesto a 'c' (radianes)",
     },
     hypotheses=[
-        Hypothesis("a > 0",      lambda ctx: ctx["a"] > 0),
-        Hypothesis("b > 0",      lambda ctx: ctx["b"] > 0),
-        Hypothesis("c > 0",      lambda ctx: ctx["c"] > 0),
-        Hypothesis("0 < A < pi", lambda ctx: 0 < ctx["A"] < math.pi),
-        Hypothesis("0 < B < pi", lambda ctx: 0 < ctx["B"] < math.pi),
-        Hypothesis("0 < C < pi", lambda ctx: 0 < ctx["C"] < math.pi),
+        Hypothesis("a > 0"),
+        Hypothesis("b > 0"),
+        Hypothesis("c > 0"),
+        Hypothesis("0 < A < pi"),
+        Hypothesis("0 < B < pi"),
+        Hypothesis("0 < C < pi"),
     ],
     conclusions=[
         # Calcular un lado dados los otros dos y el angulo entre ellos
@@ -119,8 +118,8 @@ AREA_CIRCULO = Theorem(
         "area": "area (m^2)",
     },
     hypotheses=[
-        Hypothesis("r > 0",    lambda ctx: ctx["r"] > 0),
-        Hypothesis("area > 0", lambda ctx: ctx["area"] > 0),
+        Hypothesis("r > 0"),
+        Hypothesis("area > 0"),
     ],
     conclusions=[
         Conclusion("area", "pi * r**2",    "area a partir del radio",   unit="m^2"),
@@ -147,8 +146,8 @@ AREA_TRIANGULO = Theorem(
         "area":   "area (m^2)",
     },
     hypotheses=[
-        Hypothesis("base > 0",   lambda ctx: ctx["base"] > 0),
-        Hypothesis("altura > 0", lambda ctx: ctx["altura"] > 0),
+        Hypothesis("base > 0"),
+        Hypothesis("altura > 0"),
     ],
     conclusions=[
         Conclusion("area",   "base * altura / 2", "area a partir de base y altura", unit="m^2"),

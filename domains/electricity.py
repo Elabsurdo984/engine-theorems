@@ -33,8 +33,8 @@ OHM = Theorem(
     description="V = i * R",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("R > 0", lambda ctx: ctx["R"] > 0),
-        Hypothesis("i != 0", lambda ctx: ctx["i"] != 0),
+        Hypothesis("R > 0"),
+        Hypothesis("i != 0"),
     ],
     conclusions=[
         Conclusion("V", "i * R",  "tension",      unit="V"),
@@ -52,8 +52,8 @@ POTENCIA_VI = Theorem(
     description="P = V * i",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("V != 0", lambda ctx: ctx["V"] != 0),
-        Hypothesis("i != 0", lambda ctx: ctx["i"] != 0),
+        Hypothesis("V != 0"),
+        Hypothesis("i != 0"),
     ],
     conclusions=[
         Conclusion("P", "V * i",  "potencia",   unit="W"),
@@ -71,9 +71,9 @@ POTENCIA_IR = Theorem(
     description="P = i^2 * R",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("R > 0", lambda ctx: ctx["R"] > 0),
-        Hypothesis("i != 0", lambda ctx: ctx["i"] != 0),
-        Hypothesis("P > 0", lambda ctx: ctx["P"] > 0),
+        Hypothesis("R > 0"),
+        Hypothesis("i != 0"),
+        Hypothesis("P > 0"),
     ],
     conclusions=[
         Conclusion("P", "i**2 * R",      "potencia",     unit="W"),
@@ -91,9 +91,9 @@ POTENCIA_VR = Theorem(
     description="P = V^2 / R",
     variables=_VARS,
     hypotheses=[
-        Hypothesis("R > 0", lambda ctx: ctx["R"] > 0),
-        Hypothesis("V != 0", lambda ctx: ctx["V"] != 0),
-        Hypothesis("P > 0", lambda ctx: ctx["P"] > 0),
+        Hypothesis("R > 0"),
+        Hypothesis("V != 0"),
+        Hypothesis("P > 0"),
     ],
     conclusions=[
         Conclusion("P", "V**2 / R",      "potencia",     unit="W"),
